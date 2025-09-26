@@ -51,7 +51,7 @@ func (b SelectBuilder) DistinctIf(include bool) SelectBuilder {
 }
 
 // OptionsIf adds select option to the query for each Include that is true.
-func (b SelectBuilder) OptionsIf(options ...ValIf[safeString]) SelectBuilder {
+func (b SelectBuilder) OptionsIf(options ...valIf[safeString]) SelectBuilder {
 	opts := make([]safeString, 0)
 	for _, v := range options {
 		if v.Include {
@@ -70,7 +70,7 @@ func (b SelectBuilder) OptionIf(option safeString, include bool) SelectBuilder {
 }
 
 // ColumnsIf adds result columns to the query for each Include that is true.
-func (b SelectBuilder) ColumnsIf(columns ...ValIf[safeString]) SelectBuilder {
+func (b SelectBuilder) ColumnsIf(columns ...valIf[safeString]) SelectBuilder {
 	parts := make([]Sqlizer, 0, len(columns))
 	for _, v := range columns {
 		if v.Include {
@@ -169,7 +169,7 @@ func (b SelectBuilder) WhereIf(expr Sqlizer, include bool) SelectBuilder {
 }
 
 // GroupBysIf adds GROUP BY expressions to the query for each Include that is true.
-func (b SelectBuilder) GroupBysIf(groupBys ...ValIf[safeString]) SelectBuilder {
+func (b SelectBuilder) GroupBysIf(groupBys ...valIf[safeString]) SelectBuilder {
 	grps := make([]safeString, 0)
 	for _, v := range groupBys {
 		if v.Include {
@@ -206,7 +206,7 @@ func (b SelectBuilder) OrderByClauseIf(expr Sqlizer, include bool) SelectBuilder
 }
 
 // OrderBysIf adds ORDER BY expressions to the query for each Include that is true.
-func (b SelectBuilder) OrderBysIf(orderBys ...ValIf[safeString]) SelectBuilder {
+func (b SelectBuilder) OrderBysIf(orderBys ...valIf[safeString]) SelectBuilder {
 	for _, orderBy := range orderBys {
 		if orderBy.Include {
 			b = b.OrderByClause(orderBy.Value)

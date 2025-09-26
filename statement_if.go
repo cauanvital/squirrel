@@ -1,7 +1,7 @@
 package squirrel
 
 // SelectIf returns a SelectBuilder for this StatementBuilderType, only with columns with true boolean value.
-func (b StatementBuilderType) SelectIf(columns ...ValIf[safeString]) SelectBuilder {
+func (b StatementBuilderType) SelectIf(columns ...valIf[safeString]) SelectBuilder {
 	cols := make([]safeString, 0)
 	for _, v := range columns {
 		if v.Include {
@@ -14,7 +14,7 @@ func (b StatementBuilderType) SelectIf(columns ...ValIf[safeString]) SelectBuild
 // SelectIf returns a new SelectBuilder, optionally setting some result columns, only with columns with true boolean value.
 //
 // See SelectBuilder.Columns.
-func SelectIf(columns ...ValIf[safeString]) SelectBuilder {
+func SelectIf(columns ...valIf[safeString]) SelectBuilder {
 	cols := make([]safeString, 0)
 	for _, v := range columns {
 		if v.Include {
