@@ -243,7 +243,7 @@ func (b UpdateBuilder) SetMap(clauses map[safeString]interface{}) UpdateBuilder 
 		return keys[idx] < keys[jdx]
 	})
 	for _, key := range keys {
-		val, _ := clauses[key]
+		val := clauses[key]
 		b = b.Set(key, val)
 	}
 	return b
