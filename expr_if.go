@@ -10,11 +10,12 @@ type exprIf struct {
 	include    bool
 }
 
-// ExprIf creates an expression from a SQL fragment and arguments that will be written only if 'include' is true.
+// ExprIf is a Sqlizer that conditionally wraps an expression.
 //
 // Ex:
 //
-//	ExprIf(Expr("FROM_UNIXTIME(?)", t), true)
+//	ExprIf(Expr("FROM_UNIXTIME(?)", t), true) == "FROM_UNIXTIME(t)"
+//	ExprIf(Expr("FROM_UNIXTIME(?)", t), false) == ""
 func ExprIf(expression expr, include bool) Sqlizer {
 	return exprIf{expression: expression, include: include}
 }
