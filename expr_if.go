@@ -90,7 +90,7 @@ type SqIf struct {
 
 func (sqIf SqIf) ToSql() (sql string, args []interface{}, err error) {
 	if sqIf.include {
-		return sqIf.ToSql()
+		return sqIf.clause.ToSql()
 	}
 	return "", nil, nil
 }
