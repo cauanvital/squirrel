@@ -33,22 +33,22 @@ func TestSelectIfFunctions(t *testing.T) {
 			assert.Equal(t, "SELECT id, email FROM users", sql)
 		})
 
-		t.Run("should default to SELECT * when all columns are excluded", func(t *testing.T) {
+		t.Run("should default to empty string when all columns are excluded", func(t *testing.T) {
 			b := SelectIf(
 				ValIf[safeString]("id", false),
 				ValIf[safeString]("name", false),
 			).From("users")
 
 			sql, _, err := b.ToSql()
-			assert.NoError(t, err)
-			assert.Equal(t, "SELECT * FROM users", sql)
+			assert.Error(t, err)
+			assert.Equal(t, "", sql)
 		})
 
-		t.Run("should default to SELECT * when called with no arguments", func(t *testing.T) {
+		t.Run("should default to empty string when called with no arguments", func(t *testing.T) {
 			b := SelectIf().From("users")
 			sql, _, err := b.ToSql()
-			assert.NoError(t, err)
-			assert.Equal(t, "SELECT * FROM users", sql)
+			assert.Error(t, err)
+			assert.Equal(t, "", sql)
 		})
 	})
 
@@ -76,14 +76,14 @@ func TestSelectIfFunctions(t *testing.T) {
 			assert.Equal(t, "SELECT id FROM users", sql)
 		})
 
-		t.Run("should default to SELECT * when all columns are excluded", func(t *testing.T) {
+		t.Run("should default to empty string when all columns are excluded", func(t *testing.T) {
 			b := StatementBuilder.SelectIf(
 				ValIf[safeString]("id", false),
 			).From("users")
 
 			sql, _, err := b.ToSql()
-			assert.NoError(t, err)
-			assert.Equal(t, "SELECT * FROM users", sql)
+			assert.Error(t, err)
+			assert.Equal(t, "", sql)
 		})
 	})
 }
