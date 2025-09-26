@@ -28,25 +28,25 @@ type selectData struct {
 
 func (d *selectData) Exec() (sql.Result, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return ExecWith(d.RunWith, d)
 }
 
 func (d *selectData) Query() (*sql.Rows, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return QueryWith(d.RunWith, d)
 }
 
 func (d *selectData) QueryRow() RowScanner {
 	if d.RunWith == nil {
-		return &Row{err: RunnerNotSet}
+		return &Row{err: ErrRunnerNotSet}
 	}
 	queryRower, ok := d.RunWith.(QueryRower)
 	if !ok {
-		return &Row{err: RunnerNotQueryRunner}
+		return &Row{err: ErrRunnerNotQueryRunner}
 	}
 	return QueryRowWith(queryRower, d)
 }
@@ -272,7 +272,8 @@ func (b SelectBuilder) RemoveColumns() SelectBuilder {
 // Column adds a result column to the query.
 // Unlike Columns, Column accepts args which will be bound to placeholders in
 // the columns string, for example:
-//   Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
+//
+//	Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
 func (b SelectBuilder) Column(column interface{}, args ...interface{}) SelectBuilder {
 	return builder.Append(b, "Columns", newPart(column, args...)).(SelectBuilder)
 }

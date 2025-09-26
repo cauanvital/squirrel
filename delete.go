@@ -23,7 +23,7 @@ type deleteData struct {
 
 func (d *deleteData) Exec() (sql.Result, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return ExecWith(d.RunWith, d)
 }
@@ -185,7 +185,7 @@ func (b DeleteBuilder) Query() (*sql.Rows, error) {
 
 func (d *deleteData) Query() (*sql.Rows, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return QueryWith(d.RunWith, d)
 }

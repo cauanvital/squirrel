@@ -10,7 +10,7 @@ import (
 )
 
 type DBStub struct {
-	err error
+	_ error
 
 	LastPrepareSql string
 	PrepareCount   int

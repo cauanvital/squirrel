@@ -80,7 +80,7 @@ func TestUpdateBuilderNoRunner(t *testing.T) {
 	b := Update("test").Set("x", 1)
 
 	_, err := b.Exec()
-	assert.Equal(t, RunnerNotSet, err)
+	assert.Equal(t, ErrRunnerNotSet, err)
 }
 
 func TestUpdateBuilderFrom(t *testing.T) {

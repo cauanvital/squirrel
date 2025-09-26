@@ -31,25 +31,25 @@ type setClause struct {
 
 func (d *updateData) Exec() (sql.Result, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return ExecWith(d.RunWith, d)
 }
 
 func (d *updateData) Query() (*sql.Rows, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return QueryWith(d.RunWith, d)
 }
 
 func (d *updateData) QueryRow() RowScanner {
 	if d.RunWith == nil {
-		return &Row{err: RunnerNotSet}
+		return &Row{err: ErrRunnerNotSet}
 	}
 	queryRower, ok := d.RunWith.(QueryRower)
 	if !ok {
-		return &Row{err: RunnerNotQueryRunner}
+		return &Row{err: ErrRunnerNotQueryRunner}
 	}
 	return QueryRowWith(queryRower, d)
 }
@@ -236,7 +236,7 @@ func (b UpdateBuilder) SetMap(clauses map[string]interface{}) UpdateBuilder {
 	}
 	sort.Strings(keys)
 	for _, key := range keys {
-		val, _ := clauses[key]
+		val := clauses[key]
 		b = b.Set(key, val)
 	}
 	return b

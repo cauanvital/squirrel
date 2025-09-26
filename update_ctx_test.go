@@ -1,3 +1,4 @@
+//go:build go1.8
 // +build go1.8
 
 package squirrel
@@ -31,11 +32,11 @@ func TestUpdateBuilderContextNoRunner(t *testing.T) {
 	b := Update("test").Set("x", 1)
 
 	_, err := b.ExecContext(ctx)
-	assert.Equal(t, RunnerNotSet, err)
+	assert.Equal(t, ErrRunnerNotSet, err)
 
 	_, err = b.QueryContext(ctx)
-	assert.Equal(t, RunnerNotSet, err)
+	assert.Equal(t, ErrRunnerNotSet, err)
 
 	err = b.ScanContext(ctx)
-	assert.Equal(t, RunnerNotSet, err)
+	assert.Equal(t, ErrRunnerNotSet, err)
 }

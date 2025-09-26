@@ -67,7 +67,7 @@ func TestDeleteBuilderNoRunner(t *testing.T) {
 	b := Delete("test")
 
 	_, err := b.Exec()
-	assert.Equal(t, RunnerNotSet, err)
+	assert.Equal(t, ErrRunnerNotSet, err)
 }
 
 func TestDeleteWithQuery(t *testing.T) {

@@ -27,25 +27,25 @@ type insertData struct {
 
 func (d *insertData) Exec() (sql.Result, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return ExecWith(d.RunWith, d)
 }
 
 func (d *insertData) Query() (*sql.Rows, error) {
 	if d.RunWith == nil {
-		return nil, RunnerNotSet
+		return nil, ErrRunnerNotSet
 	}
 	return QueryWith(d.RunWith, d)
 }
 
 func (d *insertData) QueryRow() RowScanner {
 	if d.RunWith == nil {
-		return &Row{err: RunnerNotSet}
+		return &Row{err: ErrRunnerNotSet}
 	}
 	queryRower, ok := d.RunWith.(QueryRower)
 	if !ok {
-		return &Row{err: RunnerNotQueryRunner}
+		return &Row{err: ErrRunnerNotQueryRunner}
 	}
 	return QueryRowWith(queryRower, d)
 }

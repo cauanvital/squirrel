@@ -63,7 +63,7 @@ func TestRunWithBaseRunner(t *testing.T) {
 
 func TestRunWithBaseRunnerQueryRowError(t *testing.T) {
 	sb := StatementBuilder.RunWith(fakeBaseRunner{})
-	assert.Error(t, RunnerNotQueryRunner, sb.Select("test").QueryRow().Scan(nil))
+	assert.Error(t, ErrRunnerNotQueryRunner, sb.Select("test").QueryRow().Scan(nil))
 
 }
 
