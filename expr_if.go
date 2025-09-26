@@ -6,8 +6,8 @@ import (
 )
 
 type exprIf struct {
-	expr
-	include bool
+	expression expr
+	include    bool
 }
 
 // ExprIf creates an expression from a SQL fragment and arguments that will be written only if 'include' is true.
@@ -15,15 +15,15 @@ type exprIf struct {
 // Ex:
 //
 //	ExprIf(Expr("FROM_UNIXTIME(?)", t), true)
-func ExprIf(e expr, include bool) Sqlizer {
-	return exprIf{expr: e, include: include}
+func ExprIf(expression expr, include bool) Sqlizer {
+	return exprIf{expression: expression, include: include}
 }
 
 func (eIf exprIf) ToSql() (sql string, args []any, err error) {
 	if !eIf.include {
 		return "", nil, nil
 	}
-	e := eIf.expr
+	e := eIf.expression
 
 	simple := true
 	for _, arg := range e.args {
