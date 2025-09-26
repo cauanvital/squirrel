@@ -2,7 +2,7 @@ package squirrel
 
 import (
 	"database/sql"
-	"fmt"
+	"errors"
 	"strings"
 	"testing"
 
@@ -25,7 +25,7 @@ type DBStub struct {
 	LastQueryRowArgs []interface{}
 }
 
-var StubError = fmt.Errorf("this is a stub; this is only a stub")
+var ErrStub = errors.New("this is a stub; this is only a stub")
 
 func (s *DBStub) Prepare(query string) (*sql.Stmt, error) {
 	s.LastPrepareSql = query

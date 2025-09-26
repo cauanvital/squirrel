@@ -1,3 +1,4 @@
+//go:build go1.8
 // +build go1.8
 
 package squirrel
@@ -8,8 +9,8 @@ import (
 	"errors"
 )
 
-// NoContextSupport is returned if a db doesn't support Context.
-var NoContextSupport = errors.New("DB does not support Context")
+// ErrNoContextSupport is returned if a db doesn't support Context.
+var ErrNoContextSupport = errors.New("DB does not support Context")
 
 // ExecerContext is the interface that wraps the ExecContext method.
 //
