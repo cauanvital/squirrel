@@ -113,12 +113,12 @@ func TestSelectBuilderConditional(t *testing.T) {
 	})
 
 	t.Run("OrderByIf (singular)", func(t *testing.T) {
-		b := baseQuery.OrderByIf("created_at DESC", true)
+		b := baseQuery.OrderByIf(valIf[safeString]{"created_at DESC", true})
 		sql, _, err := b.ToSql()
 		assert.NoError(t, err)
 		assert.Equal(t, "SELECT id FROM users ORDER BY created_at DESC", sql)
 
-		b = baseQuery.OrderByIf("created_at DESC", false)
+		b = baseQuery.OrderByIf(valIf[safeString]{"created_at DESC", false})
 		sql, _, err = b.ToSql()
 		assert.NoError(t, err)
 		assert.Equal(t, "SELECT id FROM users", sql)

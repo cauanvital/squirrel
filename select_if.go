@@ -1,11 +1,5 @@
 package squirrel
 
-import (
-	"fmt"
-
-	"github.com/lann/builder"
-)
-
 // PlaceholderFormatIf sets PlaceholderFormat (e.g. Question or Dollar) for the
 // query if include is true.
 func (b selectBuilder) PlaceholderFormatIf(f PlaceholderFormat, include bool) selectBuilder {
@@ -37,7 +31,7 @@ func (b selectBuilder) PrefixIf(sql safeString, include bool, args ...interface{
 // PrefixExprIf adds an expression to the very beginning of the query if include is true.
 func (b selectBuilder) PrefixExprIf(expr Sqlizer, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "Prefixes", expr).(selectBuilder)
+		return b.PrefixExpr(expr)
 	}
 	return b
 }
@@ -52,32 +46,26 @@ func (b selectBuilder) DistinctIf(include bool) selectBuilder {
 
 // OptionsIf adds select option to the query for each Include that is true.
 func (b selectBuilder) OptionsIf(options ...valIf[safeString]) selectBuilder {
-	opts := make([]safeString, 0)
 	for _, v := range options {
-		if v.Include {
-			opts = append(opts, v.Value)
-		}
+		b = b.OptionIf(v.Value, v.Include)
 	}
-	return builder.Extend(b, "Options", opts).(selectBuilder)
+	return b
 }
 
 // OptionIf adds a single select option to the query if include is true.
 func (b selectBuilder) OptionIf(option safeString, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "Options", option).(selectBuilder)
+		return b.Options(option)
 	}
 	return b
 }
 
 // ColumnsIf adds result columns to the query for each Include that is true.
 func (b selectBuilder) ColumnsIf(columns ...valIf[safeString]) selectBuilder {
-	parts := make([]Sqlizer, 0, len(columns))
 	for _, v := range columns {
-		if v.Include {
-			parts = append(parts, v.Value)
-		}
+		b = b.ColumnIf(v.Value, v.Include)
 	}
-	return builder.Extend(b, "Columns", parts).(selectBuilder)
+	return b
 }
 
 // ColumnIf adds a result column to the query if include is true.
@@ -88,7 +76,7 @@ func (b selectBuilder) ColumnsIf(columns ...valIf[safeString]) selectBuilder {
 //	ColumnIf(Expr("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3), false) == ""
 func (b selectBuilder) ColumnIf(expr Sqlizer, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "Columns", expr).(selectBuilder)
+		return b.Column(expr)
 	}
 	return b
 }
@@ -96,7 +84,7 @@ func (b selectBuilder) ColumnIf(expr Sqlizer, include bool) selectBuilder {
 // JoinClauseIf adds a join clause to the query if include is true.
 func (b selectBuilder) JoinClauseIf(expr Sqlizer, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "Joins", expr).(selectBuilder)
+		return b.JoinClause(expr)
 	}
 	return b
 }
@@ -162,27 +150,24 @@ func (b selectBuilder) CrossJoinIf(join safeString, include bool, rest ...interf
 //
 // Where will panic if pred isn't any of the above types.
 func (b selectBuilder) WhereIf(expr Sqlizer, include bool) selectBuilder {
-	if include && expr != nil {
-		return builder.Append(b, "WhereParts", expr).(selectBuilder)
+	if include {
+		return b.Where(expr)
 	}
 	return b
 }
 
 // GroupBysIf adds GROUP BY expressions to the query for each Include that is true.
 func (b selectBuilder) GroupBysIf(groupBys ...valIf[safeString]) selectBuilder {
-	grps := make([]safeString, 0)
 	for _, v := range groupBys {
-		if v.Include {
-			grps = append(grps, v.Value)
-		}
+		b = b.GroupByIf(v.Value, v.Include)
 	}
-	return builder.Extend(b, "GroupBys", grps).(selectBuilder)
+	return b
 }
 
 // GroupByIf adds a single GROUP BY expression to the query if include is true.
 func (b selectBuilder) GroupByIf(groupBy safeString, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "GroupBys", groupBy).(selectBuilder)
+		return b.GroupBy(groupBy)
 	}
 	return b
 }
@@ -191,8 +176,8 @@ func (b selectBuilder) GroupByIf(groupBy safeString, include bool) selectBuilder
 //
 // See Where.
 func (b selectBuilder) HavingIf(expr Sqlizer, include bool) selectBuilder {
-	if include && expr != nil {
-		return builder.Append(b, "HavingParts", expr).(selectBuilder)
+	if include {
+		return b.Having(expr)
 	}
 	return b
 }
@@ -200,26 +185,15 @@ func (b selectBuilder) HavingIf(expr Sqlizer, include bool) selectBuilder {
 // OrderByClauseIf adds ORDER BY clause to the query if include is true.
 func (b selectBuilder) OrderByClauseIf(expr Sqlizer, include bool) selectBuilder {
 	if include {
-		return builder.Append(b, "OrderByParts", expr).(selectBuilder)
+		return b.OrderByClause(expr)
 	}
 	return b
 }
 
 // OrderBysIf adds ORDER BY expressions to the query for each Include that is true.
-func (b selectBuilder) OrderBysIf(orderBys ...valIf[safeString]) selectBuilder {
-	for _, orderBy := range orderBys {
-		if orderBy.Include {
-			b = b.OrderByClause(orderBy.Value)
-		}
-	}
-
-	return b
-}
-
-// OrderByIf adds a single ORDER BY expression to the query if include is true.
-func (b selectBuilder) OrderByIf(orderBy safeString, include bool) selectBuilder {
-	if include {
-		b = b.OrderByClause(orderBy)
+func (b selectBuilder) OrderByIf(orderBys ...valIf[safeString]) selectBuilder {
+	for _, v := range orderBys {
+		b = b.OrderByClauseIf(v.Value, v.Include)
 	}
 	return b
 }
@@ -227,7 +201,7 @@ func (b selectBuilder) OrderByIf(orderBy safeString, include bool) selectBuilder
 // LimitIf sets a LIMIT clause on the query if include is true.
 func (b selectBuilder) LimitIf(limit uint64, include bool) selectBuilder {
 	if include {
-		return builder.Set(b, "Limit", fmt.Sprintf("%d", limit)).(selectBuilder)
+		return b.Limit(limit)
 	}
 	return b
 }
@@ -235,7 +209,7 @@ func (b selectBuilder) LimitIf(limit uint64, include bool) selectBuilder {
 // OffsetIf sets a OFFSET clause on the query if include is true.
 func (b selectBuilder) OffsetIf(offset uint64, include bool) selectBuilder {
 	if include {
-		return builder.Set(b, "Offset", fmt.Sprintf("%d", offset)).(selectBuilder)
+		return b.Offset(offset)
 	}
 	return b
 }
