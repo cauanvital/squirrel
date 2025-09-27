@@ -27,8 +27,8 @@ func (b StatementBuilderType) Update(table safeString) UpdateBuilder {
 }
 
 // Delete returns a DeleteBuilder for this StatementBuilderType.
-func (b StatementBuilderType) Delete(from safeString) DeleteBuilder {
-	return DeleteBuilder(b).From(from)
+func (b StatementBuilderType) Delete(from safeString) deleteBuilder {
+	return DeleteBuilder().From(from)
 }
 
 // PlaceholderFormat sets the PlaceholderFormat field for any child builders.
@@ -83,14 +83,14 @@ func Update(table safeString) UpdateBuilder {
 // Delete returns a new DeleteBuilder with the given table name.
 //
 // See DeleteBuilder.Table.
-func Delete(from safeString) DeleteBuilder {
+func Delete(from safeString) deleteBuilder {
 	return StatementBuilder.Delete(from)
 }
 
 // Case returns a new CaseBuilder
 // "what" represents optional case value
-func Case(what ...Sqlizer) CaseBuilder {
-	b := CaseBuilder(builder.EmptyBuilder)
+func Case(what ...Sqlizer) caseBuilder {
+	b := CaseBuilder()
 
 	switch len(what) {
 	case 0:

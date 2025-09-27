@@ -6,8 +6,6 @@ package squirrel
 import (
 	"context"
 	"database/sql"
-
-	"github.com/lann/builder"
 )
 
 func (d *deleteData) ExecContext(ctx context.Context) (sql.Result, error) {
@@ -47,24 +45,21 @@ func (d *deleteData) QueryRowContext(ctx context.Context) RowScanner {
 }
 
 // ExecContext builds and ExecContexts the query with the Runner set by RunWith.
-func (b DeleteBuilder) ExecContext(ctx context.Context) (sql.Result, error) {
-	data := builder.GetStruct(b).(deleteData)
-	return data.ExecContext(ctx)
+func (b deleteBuilder) ExecContext(ctx context.Context) (sql.Result, error) {
+	return b.data.ExecContext(ctx)
 }
 
 // QueryContext builds and QueryContexts the query with the Runner set by RunWith.
-func (b DeleteBuilder) QueryContext(ctx context.Context) (*sql.Rows, error) {
-	data := builder.GetStruct(b).(deleteData)
-	return data.QueryContext(ctx)
+func (b deleteBuilder) QueryContext(ctx context.Context) (*sql.Rows, error) {
+	return b.data.QueryContext(ctx)
 }
 
 // QueryRowContext builds and QueryRowContexts the query with the Runner set by RunWith.
-func (b DeleteBuilder) QueryRowContext(ctx context.Context) RowScanner {
-	data := builder.GetStruct(b).(deleteData)
-	return data.QueryRowContext(ctx)
+func (b deleteBuilder) QueryRowContext(ctx context.Context) RowScanner {
+	return b.data.QueryRowContext(ctx)
 }
 
 // ScanContext is a shortcut for QueryRowContext().Scan.
-func (b DeleteBuilder) ScanContext(ctx context.Context, dest ...interface{}) error {
+func (b deleteBuilder) ScanContext(ctx context.Context, dest ...interface{}) error {
 	return b.QueryRowContext(ctx).Scan(dest...)
 }

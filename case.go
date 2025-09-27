@@ -3,13 +3,7 @@ package squirrel
 import (
 	"bytes"
 	"errors"
-
-	"github.com/lann/builder"
 )
-
-func init() {
-	builder.Register(CaseBuilder{}, caseData{})
-}
 
 // sqlizerBuffer is a helper that allows to write many Sqlizers one by one
 // without constant checks for errors that may come from Sqlizer
@@ -92,17 +86,33 @@ func (d *caseData) ToSql() (sqlStr string, args []interface{}, err error) {
 }
 
 // CaseBuilder builds SQL CASE construct which could be used as parts of queries.
-type CaseBuilder builder.Builder
+type caseBuilder struct {
+	data caseData
+}
+
+func CaseBuilder() caseBuilder {
+	return caseBuilder{
+		data: caseData{
+			WhenParts: make([]whenPart, 0),
+		},
+	}
+}
+
+// Commenting this for testing direct builder
+// type CaseBuilder builder.Builder
+
+// func init() {
+// 	builder.Register(CaseBuilder{}, caseData{})
+// }
 
 // ToSql builds the query into a SQL string and bound args.
-func (b CaseBuilder) ToSql() (string, []interface{}, error) {
-	data := builder.GetStruct(b).(caseData)
-	return data.ToSql()
+func (b caseBuilder) ToSql() (string, []interface{}, error) {
+	return b.data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b CaseBuilder) MustSql() (string, []interface{}) {
+func (b caseBuilder) MustSql() (string, []interface{}) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -111,18 +121,21 @@ func (b CaseBuilder) MustSql() (string, []interface{}) {
 }
 
 // what sets optional value for CASE construct "CASE [value] ..."
-func (b CaseBuilder) what(expr Sqlizer) CaseBuilder {
-	return builder.Set(b, "What", expr).(CaseBuilder)
+func (b caseBuilder) what(expr Sqlizer) caseBuilder {
+	b.data.What = expr
+	return b
 }
 
 // When adds "WHEN ... THEN ..." part to CASE construct
-func (b CaseBuilder) When(when Sqlizer, then Sqlizer) CaseBuilder {
+func (b caseBuilder) When(when Sqlizer, then Sqlizer) caseBuilder {
 	// TODO: performance hint: replace slice of WhenPart with just slice of parts
 	// where even indices of the slice belong to "when"s and odd indices belong to "then"s
-	return builder.Append(b, "WhenParts", newWhenPart(when, then)).(CaseBuilder)
+	b.data.WhenParts = append(b.data.WhenParts, newWhenPart(when, then))
+	return b
 }
 
 // What sets optional "ELSE ..." part for CASE construct
-func (b CaseBuilder) Else(expr Sqlizer) CaseBuilder {
-	return builder.Set(b, "Else", expr).(CaseBuilder)
+func (b caseBuilder) Else(expr Sqlizer) caseBuilder {
+	b.data.Else = expr
+	return b
 }

@@ -173,7 +173,20 @@ type selectBuilder struct {
 }
 
 func SelectBuilder() selectBuilder {
-	return selectBuilder{}
+	return selectBuilder{
+		data: selectData{
+			PlaceholderFormat: Question,
+			Prefixes:          make([]Sqlizer, 0),
+			Options:           make([]safeString, 0),
+			Columns:           make([]Sqlizer, 0),
+			Joins:             make([]Sqlizer, 0),
+			WhereParts:        make([]Sqlizer, 0),
+			GroupBys:          make([]safeString, 0),
+			HavingParts:       make([]Sqlizer, 0),
+			OrderByParts:      make([]Sqlizer, 0),
+			Suffixes:          make([]Sqlizer, 0),
+		},
+	}
 }
 
 // Commenting this for testing direct builder
