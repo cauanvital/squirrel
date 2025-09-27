@@ -22,7 +22,7 @@ type insertData struct {
 	Columns           []safeString
 	Values            [][]interface{}
 	Suffixes          []Sqlizer
-	Select            *SelectBuilder
+	Select            *selectBuilder
 }
 
 func (d *insertData) Exec() (sql.Result, error) {
@@ -298,7 +298,7 @@ func (b InsertBuilder) SetMap(clauses map[safeString]interface{}) InsertBuilder 
 
 // Select set Select clause for insert query
 // If Values and Select are used, then Select has higher priority
-func (b InsertBuilder) Select(sb SelectBuilder) InsertBuilder {
+func (b InsertBuilder) Select(sb selectBuilder) InsertBuilder {
 	return builder.Set(b, "Select", &sb).(InsertBuilder)
 }
 

@@ -6,8 +6,8 @@ import "github.com/lann/builder"
 type StatementBuilderType builder.Builder
 
 // Select returns a SelectBuilder for this StatementBuilderType.
-func (b StatementBuilderType) Select(columns ...safeString) SelectBuilder {
-	return SelectBuilder(b).Columns(columns...)
+func (b StatementBuilderType) Select(columns ...safeString) selectBuilder {
+	return SelectBuilder().Columns(columns...)
 }
 
 // Insert returns a InsertBuilder for this StatementBuilderType.
@@ -54,7 +54,7 @@ var StatementBuilder = StatementBuilderType(builder.EmptyBuilder).PlaceholderFor
 // Select returns a new SelectBuilder, optionally setting some result columns.
 //
 // See SelectBuilder.Columns.
-func Select(columns ...safeString) SelectBuilder {
+func Select(columns ...safeString) selectBuilder {
 	return StatementBuilder.Select(columns...)
 }
 

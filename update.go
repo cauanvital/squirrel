@@ -87,7 +87,7 @@ func (d *updateData) ToSql() (sqlStr string, args []interface{}, err error) {
 			if err != nil {
 				return "", nil, err
 			}
-			if _, ok := vs.(SelectBuilder); ok {
+			if _, ok := vs.(selectBuilder); ok {
 				valSql = fmt.Sprintf("(%s)", vsql)
 			} else {
 				valSql = vsql
@@ -256,7 +256,7 @@ func (b UpdateBuilder) From(from safeString) UpdateBuilder {
 }
 
 // FromSelect sets a subquery into the FROM clause of the query.
-func (b UpdateBuilder) FromSelect(from SelectBuilder, alias safeString) UpdateBuilder {
+func (b UpdateBuilder) FromSelect(from selectBuilder, alias safeString) UpdateBuilder {
 	// Prevent misnumbered parameters in nested selects (#183).
 	from = from.PlaceholderFormat(Question)
 	return builder.Set(b, "From", Alias(from, alias)).(UpdateBuilder)
@@ -264,7 +264,7 @@ func (b UpdateBuilder) FromSelect(from SelectBuilder, alias safeString) UpdateBu
 
 // Where adds WHERE expressions to the query.
 //
-// See SelectBuilder.Where for more information.
+// See selectBuilder.Where for more information.
 func (b UpdateBuilder) Where(expr Sqlizer) UpdateBuilder {
 	return builder.Append(b, "WhereParts", expr).(UpdateBuilder)
 }
