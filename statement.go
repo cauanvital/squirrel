@@ -91,7 +91,6 @@ func Delete(from safeString) deleteBuilder {
 // "what" represents optional case value
 func Case(what ...Sqlizer) caseBuilder {
 	b := CaseBuilder()
-
 	switch len(what) {
 	case 0:
 		return b
