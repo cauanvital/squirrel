@@ -10,7 +10,7 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
-  sqrl "github.com/Masterminds/squirrel"
+	sqrl "github.com/Masterminds/squirrel"
 
 	_ "github.com/go-sql-driver/mysql"
 	_ "github.com/lib/pq"
@@ -30,8 +30,12 @@ const (
 )
 
 var (
-	sb sqrl.StatementBuilderType
+	sb = sqrl.StatementBuilder
 )
+
+type selectBuilder interface {
+	Query() (*sql.Rows, error)
+}
 
 func TestMain(m *testing.M) {
 	var driver, dataSource string
@@ -39,9 +43,9 @@ func TestMain(m *testing.M) {
 	flag.StringVar(&dataSource, "dataSource", "", "integration database data source")
 	flag.Parse()
 
-  if driver == "" {
-    driver = "sqlite3"
-  }
+	if driver == "" {
+		driver = "sqlite3"
+	}
 
 	if driver == "sqlite3" && dataSource == "" {
 		dataSource = ":memory:"
@@ -79,7 +83,7 @@ func TestMain(m *testing.M) {
 	os.Exit(m.Run())
 }
 
-func assertVals(t *testing.T, s sqrl.SelectBuilder, expected ...string) {
+func assertVals(t *testing.T, s selectBuilder, expected ...string) {
 	rows, err := s.Query()
 	assert.NoError(t, err)
 	defer rows.Close()
