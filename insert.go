@@ -171,47 +171,70 @@ func (d *insertData) appendSelectToSQL(w io.Writer, args []interface{}) ([]inter
 // Builder
 
 // InsertBuilder builds SQL INSERT statements.
-type InsertBuilder builder.Builder
-
-func init() {
-	builder.Register(InsertBuilder{}, insertData{})
+type insertBuilder struct {
+	data insertData
 }
+
+func InsertBuilder() insertBuilder {
+	return insertBuilder{
+		data: insertData{
+			PlaceholderFormat: Question,
+			Prefixes:          make([]Sqlizer, 0),
+			Options:           make([]safeString, 0),
+			Columns:           make([]safeString, 0),
+			Values:            make([][]interface{}, 0),
+			Suffixes:          make([]Sqlizer, 0),
+		},
+	}
+}
+
+// Commenting this for testing direct builder
+// type InsertBuilder builder.Builder
+
+// func init() {
+// 	builder.Register(InsertBuilder{}, insertData{})
+// }
 
 // Format methods
 
 // PlaceholderFormat sets PlaceholderFormat (e.g. Question or Dollar) for the
 // query.
-func (b InsertBuilder) PlaceholderFormat(f PlaceholderFormat) InsertBuilder {
-	return builder.Set(b, "PlaceholderFormat", f).(InsertBuilder)
+func (b insertBuilder) PlaceholderFormat(f PlaceholderFormat) insertBuilder {
+	b.data.PlaceholderFormat = f
+	return b
 }
 
 // Runner methods
 
 // RunWith sets a Runner (like database/sql.DB) to be used with e.g. Exec.
-func (b InsertBuilder) RunWith(runner BaseRunner) InsertBuilder {
-	return setRunWith(b, runner).(InsertBuilder)
+func (b insertBuilder) RunWith(runner BaseRunner) insertBuilder {
+	switch r := runner.(type) {
+	case StdSqlCtx:
+		runner = WrapStdSqlCtx(r)
+	case StdSql:
+		runner = WrapStdSql(r)
+	}
+	b.data.RunWith = runner
+	return b
 }
 
 // Exec builds and Execs the query with the Runner set by RunWith.
-func (b InsertBuilder) Exec() (sql.Result, error) {
-	data := builder.GetStruct(b).(insertData)
-	return data.Exec()
+func (b insertBuilder) Exec() (sql.Result, error) {
+	return b.data.Exec()
 }
 
 // Query builds and Querys the query with the Runner set by RunWith.
-func (b InsertBuilder) Query() (*sql.Rows, error) {
-	data := builder.GetStruct(b).(insertData)
-	return data.Query()
+func (b insertBuilder) Query() (*sql.Rows, error) {
+	return b.data.Query()
 }
 
 // QueryRow builds and QueryRows the query with the Runner set by RunWith.
-func (b InsertBuilder) QueryRow() RowScanner {
-	data := builder.GetStruct(b).(insertData)
-	return data.QueryRow()
+func (b insertBuilder) QueryRow() RowScanner {
+	return b.data.QueryRow()
 }
 
 // Scan is a shortcut for QueryRow().Scan.
-func (b InsertBuilder) Scan(dest ...interface{}) error {
+func (b insertBuilder) Scan(dest ...interface{}) error {
 	return b.QueryRow().Scan(dest...)
 }
 
