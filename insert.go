@@ -8,8 +8,6 @@ import (
 	"io"
 	"sort"
 	"strings"
-
-	"github.com/lann/builder"
 )
 
 type insertData struct {
@@ -175,10 +173,11 @@ type insertBuilder struct {
 	data insertData
 }
 
-func InsertBuilder() insertBuilder {
+func InsertBuilder(b statementBuilderType) insertBuilder {
 	return insertBuilder{
 		data: insertData{
-			PlaceholderFormat: Question,
+			PlaceholderFormat: b.placeholderFormat,
+			RunWith:           b.runWith,
 			Prefixes:          make([]Sqlizer, 0),
 			Options:           make([]safeString, 0),
 			Columns:           make([]safeString, 0),
@@ -241,14 +240,13 @@ func (b insertBuilder) Scan(dest ...interface{}) error {
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
-func (b InsertBuilder) ToSql() (string, []interface{}, error) {
-	data := builder.GetStruct(b).(insertData)
-	return data.ToSql()
+func (b insertBuilder) ToSql() (string, []interface{}, error) {
+	return b.data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b InsertBuilder) MustSql() (string, []interface{}) {
+func (b insertBuilder) MustSql() (string, []interface{}) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -257,48 +255,54 @@ func (b InsertBuilder) MustSql() (string, []interface{}) {
 }
 
 // Prefix adds an expression to the beginning of the query
-func (b InsertBuilder) Prefix(sql safeString, args ...interface{}) InsertBuilder {
+func (b insertBuilder) Prefix(sql safeString, args ...interface{}) insertBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
 // PrefixExpr adds an expression to the very beginning of the query
-func (b InsertBuilder) PrefixExpr(expr Sqlizer) InsertBuilder {
-	return builder.Append(b, "Prefixes", expr).(InsertBuilder)
+func (b insertBuilder) PrefixExpr(expr Sqlizer) insertBuilder {
+	b.data.Prefixes = append(b.data.Prefixes, expr)
+	return b
 }
 
 // Options adds keyword options before the INTO clause of the query.
-func (b InsertBuilder) Options(options ...safeString) InsertBuilder {
-	return builder.Extend(b, "Options", options).(InsertBuilder)
+func (b insertBuilder) Options(options ...safeString) insertBuilder {
+	b.data.Options = append(b.data.Options, options...)
+	return b
 }
 
 // Into sets the INTO clause of the query.
-func (b InsertBuilder) Into(into safeString) InsertBuilder {
-	return builder.Set(b, "Into", into).(InsertBuilder)
+func (b insertBuilder) Into(into safeString) insertBuilder {
+	b.data.Into = into
+	return b
 }
 
 // Columns adds insert columns to the query.
-func (b InsertBuilder) Columns(columns ...safeString) InsertBuilder {
-	return builder.Extend(b, "Columns", columns).(InsertBuilder)
+func (b insertBuilder) Columns(columns ...safeString) insertBuilder {
+	b.data.Columns = append(b.data.Columns, columns...)
+	return b
 }
 
 // Values adds a single row's values to the query.
-func (b InsertBuilder) Values(values ...interface{}) InsertBuilder {
-	return builder.Append(b, "Values", values).(InsertBuilder)
+func (b insertBuilder) Values(values ...interface{}) insertBuilder {
+	b.data.Values = append(b.data.Values, values)
+	return b
 }
 
 // Suffix adds an expression to the end of the query
-func (b InsertBuilder) Suffix(sql safeString, args ...interface{}) InsertBuilder {
+func (b insertBuilder) Suffix(sql safeString, args ...interface{}) insertBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
 }
 
 // SuffixExpr adds an expression to the end of the query
-func (b InsertBuilder) SuffixExpr(expr Sqlizer) InsertBuilder {
-	return builder.Append(b, "Suffixes", expr).(InsertBuilder)
+func (b insertBuilder) SuffixExpr(expr Sqlizer) insertBuilder {
+	b.data.Suffixes = append(b.data.Suffixes, expr)
+	return b
 }
 
 // SetMap set columns and values for insert builder from a map of column name and value
 // note that it will reset all previous columns and values was set if any
-func (b InsertBuilder) SetMap(clauses map[safeString]interface{}) InsertBuilder {
+func (b insertBuilder) SetMap(clauses map[safeString]interface{}) insertBuilder {
 	// Keep the columns in a consistent order by sorting the column key string.
 	cols := make([]safeString, 0, len(clauses))
 	for col := range clauses {
@@ -313,18 +317,20 @@ func (b InsertBuilder) SetMap(clauses map[safeString]interface{}) InsertBuilder 
 		vals = append(vals, clauses[col])
 	}
 
-	b = builder.Set(b, "Columns", cols).(InsertBuilder)
-	b = builder.Set(b, "Values", [][]interface{}{vals}).(InsertBuilder)
+	b.data.Columns = cols
+	b.data.Values = [][]interface{}{vals}
 
 	return b
 }
 
 // Select set Select clause for insert query
 // If Values and Select are used, then Select has higher priority
-func (b InsertBuilder) Select(sb selectBuilder) InsertBuilder {
-	return builder.Set(b, "Select", &sb).(InsertBuilder)
+func (b insertBuilder) Select(sb selectBuilder) insertBuilder {
+	b.data.Select = &sb
+	return b
 }
 
-func (b InsertBuilder) statementKeyword(keyword safeString) InsertBuilder {
-	return builder.Set(b, "StatementKeyword", keyword).(InsertBuilder)
+func (b insertBuilder) statementKeyword(keyword safeString) insertBuilder {
+	b.data.StatementKeyword = keyword
+	return b
 }

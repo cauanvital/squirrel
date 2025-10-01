@@ -6,8 +6,6 @@ package squirrel
 import (
 	"context"
 	"database/sql"
-
-	"github.com/lann/builder"
 )
 
 func (d *updateData) ExecContext(ctx context.Context) (sql.Result, error) {
@@ -47,24 +45,21 @@ func (d *updateData) QueryRowContext(ctx context.Context) RowScanner {
 }
 
 // ExecContext builds and ExecContexts the query with the Runner set by RunWith.
-func (b UpdateBuilder) ExecContext(ctx context.Context) (sql.Result, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.ExecContext(ctx)
+func (b updateBuilder) ExecContext(ctx context.Context) (sql.Result, error) {
+	return b.data.ExecContext(ctx)
 }
 
 // QueryContext builds and QueryContexts the query with the Runner set by RunWith.
-func (b UpdateBuilder) QueryContext(ctx context.Context) (*sql.Rows, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.QueryContext(ctx)
+func (b updateBuilder) QueryContext(ctx context.Context) (*sql.Rows, error) {
+	return b.data.QueryContext(ctx)
 }
 
 // QueryRowContext builds and QueryRowContexts the query with the Runner set by RunWith.
-func (b UpdateBuilder) QueryRowContext(ctx context.Context) RowScanner {
-	data := builder.GetStruct(b).(updateData)
-	return data.QueryRowContext(ctx)
+func (b updateBuilder) QueryRowContext(ctx context.Context) RowScanner {
+	return b.data.QueryRowContext(ctx)
 }
 
 // ScanContext is a shortcut for QueryRowContext().Scan.
-func (b UpdateBuilder) ScanContext(ctx context.Context, dest ...interface{}) error {
+func (b updateBuilder) ScanContext(ctx context.Context, dest ...interface{}) error {
 	return b.QueryRowContext(ctx).Scan(dest...)
 }

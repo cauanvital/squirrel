@@ -9,8 +9,6 @@ import (
 	"errors"
 	"fmt"
 	"strings"
-
-	"github.com/lann/builder"
 )
 
 // Sqlizer is the interface that wraps the ToSql method.
@@ -81,16 +79,6 @@ type stdsqlRunner struct {
 
 func (r *stdsqlRunner) QueryRow(query string, args ...interface{}) RowScanner {
 	return r.StdSql.QueryRow(query, args...)
-}
-
-func setRunWith(b interface{}, runner BaseRunner) interface{} {
-	switch r := runner.(type) {
-	case StdSqlCtx:
-		runner = WrapStdSqlCtx(r)
-	case StdSql:
-		runner = WrapStdSql(r)
-	}
-	return builder.Set(b, "RunWith", runner)
 }
 
 // RunnerNotSet is returned by methods that need a Runner if it isn't set.

@@ -42,10 +42,6 @@ type whenPart struct {
 	then Sqlizer
 }
 
-func newWhenPart(when Sqlizer, then Sqlizer) whenPart {
-	return whenPart{when, then}
-}
-
 // caseData holds all the data required to build a CASE SQL construct
 type caseData struct {
 	What      Sqlizer
@@ -57,7 +53,6 @@ type caseData struct {
 func (d *caseData) ToSql() (sqlStr string, args []interface{}, err error) {
 	if len(d.WhenParts) == 0 {
 		err = errors.New("case expression must contain at lease one WHEN clause")
-
 		return
 	}
 
@@ -79,7 +74,6 @@ func (d *caseData) ToSql() (sqlStr string, args []interface{}, err error) {
 		sql.WriteString("ELSE ")
 		sql.WriteSql(d.Else)
 	}
-
 	sql.WriteString("END")
 
 	return sql.ToSql()
@@ -98,13 +92,6 @@ func CaseBuilder() caseBuilder {
 	}
 }
 
-// Commenting this for testing direct builder
-// type CaseBuilder builder.Builder
-
-// func init() {
-// 	builder.Register(CaseBuilder{}, caseData{})
-// }
-
 // ToSql builds the query into a SQL string and bound args.
 func (b caseBuilder) ToSql() (string, []interface{}, error) {
 	return b.data.ToSql()
@@ -120,7 +107,7 @@ func (b caseBuilder) MustSql() (string, []interface{}) {
 	return sql, args
 }
 
-// what sets optional value for CASE construct "CASE [value] ..."
+// what sets the optional value for the CASE construct, e.g., "CASE status ..."
 func (b caseBuilder) what(expr Sqlizer) caseBuilder {
 	b.data.What = expr
 	return b
@@ -130,11 +117,11 @@ func (b caseBuilder) what(expr Sqlizer) caseBuilder {
 func (b caseBuilder) When(when Sqlizer, then Sqlizer) caseBuilder {
 	// TODO: performance hint: replace slice of WhenPart with just slice of parts
 	// where even indices of the slice belong to "when"s and odd indices belong to "then"s
-	b.data.WhenParts = append(b.data.WhenParts, newWhenPart(when, then))
+	b.data.WhenParts = append(b.data.WhenParts, whenPart{when, then})
 	return b
 }
 
-// What sets optional "ELSE ..." part for CASE construct
+// Else sets the optional "ELSE ..." part for the CASE construct.
 func (b caseBuilder) Else(expr Sqlizer) caseBuilder {
 	b.data.Else = expr
 	return b

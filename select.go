@@ -172,15 +172,16 @@ type selectBuilder struct {
 	data selectData
 }
 
-func SelectBuilder() selectBuilder {
+func SelectBuilder(b statementBuilderType) selectBuilder {
 	return selectBuilder{
 		data: selectData{
-			PlaceholderFormat: Question,
+			PlaceholderFormat: b.placeholderFormat,
+			RunWith:           b.runWith,
+			WhereParts:        b.whereParts,
 			Prefixes:          make([]Sqlizer, 0),
 			Options:           make([]safeString, 0),
 			Columns:           make([]Sqlizer, 0),
 			Joins:             make([]Sqlizer, 0),
-			WhereParts:        make([]Sqlizer, 0),
 			GroupBys:          make([]safeString, 0),
 			HavingParts:       make([]Sqlizer, 0),
 			OrderByParts:      make([]Sqlizer, 0),
@@ -188,13 +189,6 @@ func SelectBuilder() selectBuilder {
 		},
 	}
 }
-
-// Commenting this for testing direct builder
-// type selectBuilder builder.Builder
-
-// func init() {
-// 	builder.Register(selectBuilder{}, selectData{})
-// }
 
 // Format methods
 

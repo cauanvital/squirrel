@@ -93,12 +93,13 @@ type deleteBuilder struct {
 	data deleteData
 }
 
-func DeleteBuilder() deleteBuilder {
+func DeleteBuilder(b statementBuilderType) deleteBuilder {
 	return deleteBuilder{
 		data: deleteData{
-			PlaceholderFormat: Question,
+			PlaceholderFormat: b.placeholderFormat,
+			RunWith:           b.runWith,
+			WhereParts:        b.whereParts,
 			Prefixes:          make([]Sqlizer, 0),
-			WhereParts:        make([]Sqlizer, 0),
 			OrderBys:          make([]safeString, 0),
 			Suffixes:          make([]Sqlizer, 0),
 		},

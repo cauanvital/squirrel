@@ -8,7 +8,7 @@ import (
 
 func TestSelectBuilder(t *testing.T) {
 	t.Run("ToSql builds a complete query", func(t *testing.T) {
-		b := SelectBuilder().
+		b := SelectBuilder(StatementBuilder).
 			Prefix("WITH my_cte AS (SELECT 1)").
 			Distinct().
 			Columns("id", "name").
@@ -47,7 +47,7 @@ func TestSelectBuilder(t *testing.T) {
 	t.Run("Immutability is preserved", func(t *testing.T) {
 		// This is the most important test for your new design.
 		// It ensures that the builder is truly immutable.
-		b1 := SelectBuilder().Columns("id").From("users")
+		b1 := SelectBuilder(StatementBuilder).Columns("id").From("users")
 		b2 := b1.Where(Eq{"status": "active"})
 		b3 := b2.Limit(5)
 
@@ -77,13 +77,13 @@ func TestSelectBuilder(t *testing.T) {
 	})
 
 	t.Run("ToSql returns error if no columns are set", func(t *testing.T) {
-		_, _, err := SelectBuilder().From("users").ToSql()
+		_, _, err := SelectBuilder(StatementBuilder).From("users").ToSql()
 		assert.Error(t, err)
 		assert.Equal(t, "select statements must have at least one result column", err.Error())
 	})
 
 	t.Run("RemoveColumns works correctly", func(t *testing.T) {
-		b1 := SelectBuilder().Columns("id", "name").From("users")
+		b1 := SelectBuilder(StatementBuilder).Columns("id", "name").From("users")
 		b2 := b1.RemoveColumns()
 		b3 := b2.Column(safeString("email"))
 
@@ -101,7 +101,7 @@ func TestSelectBuilder(t *testing.T) {
 	})
 
 	t.Run("RemoveLimit and RemoveOffset work correctly", func(t *testing.T) {
-		b1 := SelectBuilder().Columns("*").From("t").Limit(10).Offset(20)
+		b1 := SelectBuilder(StatementBuilder).Columns("*").From("t").Limit(10).Offset(20)
 		b2 := b1.RemoveLimit()
 		b3 := b2.RemoveOffset()
 
@@ -116,7 +116,7 @@ func TestSelectBuilder(t *testing.T) {
 	})
 
 	t.Run("PlaceholderFormat changes placeholders", func(t *testing.T) {
-		b := SelectBuilder().
+		b := SelectBuilder(StatementBuilder).
 			Columns("id").
 			From("users").
 			Where(Eq{"id": 1, "name": "foo"}).
@@ -132,12 +132,12 @@ func TestSelectBuilder(t *testing.T) {
 	})
 
 	t.Run("FromSelect builds subquery correctly", func(t *testing.T) {
-		subquery := SelectBuilder().
+		subquery := SelectBuilder(StatementBuilder).
 			Columns("id").
 			From("posts").
 			Where(Eq{"published": true})
 
-		b := SelectBuilder().
+		b := SelectBuilder(StatementBuilder).
 			Columns("user_id").
 			FromSelect(subquery, "p").
 			GroupBy("user_id")

@@ -5,9 +5,8 @@ import (
 	"database/sql"
 	"fmt"
 	"sort"
+	"strconv"
 	"strings"
-
-	"github.com/lann/builder"
 )
 
 type updateData struct {
@@ -152,58 +151,74 @@ func (d *updateData) ToSql() (sqlStr string, args []interface{}, err error) {
 // Builder
 
 // UpdateBuilder builds SQL UPDATE statements.
-type UpdateBuilder builder.Builder
+type updateBuilder struct {
+	data updateData
+}
 
-func init() {
-	builder.Register(UpdateBuilder{}, updateData{})
+func UpdateBuilder(b statementBuilderType) updateBuilder {
+	return updateBuilder{
+		data: updateData{
+			PlaceholderFormat: b.placeholderFormat,
+			RunWith:           b.runWith,
+			WhereParts:        b.whereParts,
+			Prefixes:          make([]Sqlizer, 0),
+			SetClauses:        make([]setClause, 0),
+			OrderBys:          make([]safeString, 0),
+			Suffixes:          make([]Sqlizer, 0),
+		},
+	}
 }
 
 // Format methods
 
 // PlaceholderFormat sets PlaceholderFormat (e.g. Question or Dollar) for the
 // query.
-func (b UpdateBuilder) PlaceholderFormat(f PlaceholderFormat) UpdateBuilder {
-	return builder.Set(b, "PlaceholderFormat", f).(UpdateBuilder)
+func (b updateBuilder) PlaceholderFormat(f PlaceholderFormat) updateBuilder {
+	b.data.PlaceholderFormat = f
+	return b
 }
 
 // Runner methods
 
 // RunWith sets a Runner (like database/sql.DB) to be used with e.g. Exec.
-func (b UpdateBuilder) RunWith(runner BaseRunner) UpdateBuilder {
-	return setRunWith(b, runner).(UpdateBuilder)
+func (b updateBuilder) RunWith(runner BaseRunner) updateBuilder {
+	switch r := runner.(type) {
+	case StdSqlCtx:
+		runner = WrapStdSqlCtx(r)
+	case StdSql:
+		runner = WrapStdSql(r)
+	}
+	b.data.RunWith = runner
+	return b
 }
 
 // Exec builds and Execs the query with the Runner set by RunWith.
-func (b UpdateBuilder) Exec() (sql.Result, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.Exec()
+func (b updateBuilder) Exec() (sql.Result, error) {
+	return b.data.Exec()
 }
 
-func (b UpdateBuilder) Query() (*sql.Rows, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.Query()
+func (b updateBuilder) Query() (*sql.Rows, error) {
+	return b.data.Query()
 }
 
-func (b UpdateBuilder) QueryRow() RowScanner {
-	data := builder.GetStruct(b).(updateData)
-	return data.QueryRow()
+func (b updateBuilder) QueryRow() RowScanner {
+	return b.data.QueryRow()
 }
 
-func (b UpdateBuilder) Scan(dest ...interface{}) error {
+func (b updateBuilder) Scan(dest ...interface{}) error {
 	return b.QueryRow().Scan(dest...)
 }
 
 // SQL methods
 
 // ToSql builds the query into a SQL string and bound args.
-func (b UpdateBuilder) ToSql() (string, []interface{}, error) {
-	data := builder.GetStruct(b).(updateData)
-	return data.ToSql()
+func (b updateBuilder) ToSql() (string, []interface{}, error) {
+	return b.data.ToSql()
 }
 
 // MustSql builds the query into a SQL string and bound args.
 // It panics if there are any errors.
-func (b UpdateBuilder) MustSql() (string, []interface{}) {
+func (b updateBuilder) MustSql() (string, []interface{}) {
 	sql, args, err := b.ToSql()
 	if err != nil {
 		panic(err)
@@ -212,27 +227,30 @@ func (b UpdateBuilder) MustSql() (string, []interface{}) {
 }
 
 // Prefix adds an expression to the beginning of the query
-func (b UpdateBuilder) Prefix(sql safeString, args ...interface{}) UpdateBuilder {
+func (b updateBuilder) Prefix(sql safeString, args ...interface{}) updateBuilder {
 	return b.PrefixExpr(Expr(sql, args...))
 }
 
 // PrefixExpr adds an expression to the very beginning of the query
-func (b UpdateBuilder) PrefixExpr(expr Sqlizer) UpdateBuilder {
-	return builder.Append(b, "Prefixes", expr).(UpdateBuilder)
+func (b updateBuilder) PrefixExpr(expr Sqlizer) updateBuilder {
+	b.data.Prefixes = append(b.data.Prefixes, expr)
+	return b
 }
 
 // Table sets the table to be updated.
-func (b UpdateBuilder) Table(table safeString) UpdateBuilder {
-	return builder.Set(b, "Table", table).(UpdateBuilder)
+func (b updateBuilder) Table(table safeString) updateBuilder {
+	b.data.Table = table
+	return b
 }
 
 // Set adds SET clauses to the query.
-func (b UpdateBuilder) Set(column safeString, value interface{}) UpdateBuilder {
-	return builder.Append(b, "SetClauses", setClause{column: column, value: value}).(UpdateBuilder)
+func (b updateBuilder) Set(column safeString, value interface{}) updateBuilder {
+	b.data.SetClauses = append(b.data.SetClauses, setClause{column: column, value: value})
+	return b
 }
 
 // SetMap is a convenience method which calls .Set for each key/value pair in clauses.
-func (b UpdateBuilder) SetMap(clauses map[safeString]interface{}) UpdateBuilder {
+func (b updateBuilder) SetMap(clauses map[safeString]interface{}) updateBuilder {
 	keys := make([]safeString, len(clauses))
 	i := 0
 	for key := range clauses {
@@ -251,45 +269,50 @@ func (b UpdateBuilder) SetMap(clauses map[safeString]interface{}) UpdateBuilder 
 
 // From adds FROM clause to the query
 // FROM is valid construct in postgresql only.
-func (b UpdateBuilder) From(from safeString) UpdateBuilder {
-	return builder.Set(b, "From", from).(UpdateBuilder)
+func (b updateBuilder) From(from safeString) updateBuilder {
+	b.data.From = from
+	return b
 }
 
 // FromSelect sets a subquery into the FROM clause of the query.
-func (b UpdateBuilder) FromSelect(from selectBuilder, alias safeString) UpdateBuilder {
-	// Prevent misnumbered parameters in nested selects (#183).
-	from = from.PlaceholderFormat(Question)
-	return builder.Set(b, "From", Alias(from, alias)).(UpdateBuilder)
+func (b updateBuilder) FromSelect(from selectBuilder, alias safeString) updateBuilder {
+	b.data.From = Alias(from.PlaceholderFormat(Question), alias)
+	return b
 }
 
 // Where adds WHERE expressions to the query.
 //
 // See selectBuilder.Where for more information.
-func (b UpdateBuilder) Where(expr Sqlizer) UpdateBuilder {
-	return builder.Append(b, "WhereParts", expr).(UpdateBuilder)
+func (b updateBuilder) Where(expr Sqlizer) updateBuilder {
+	b.data.WhereParts = append(b.data.WhereParts, expr)
+	return b
 }
 
 // OrderBy adds ORDER BY expressions to the query.
-func (b UpdateBuilder) OrderBy(orderBys ...safeString) UpdateBuilder {
-	return builder.Extend(b, "OrderBys", orderBys).(UpdateBuilder)
+func (b updateBuilder) OrderBy(orderBys ...safeString) updateBuilder {
+	b.data.OrderBys = append(b.data.OrderBys, orderBys...)
+	return b
 }
 
 // Limit sets a LIMIT clause on the query.
-func (b UpdateBuilder) Limit(limit uint64) UpdateBuilder {
-	return builder.Set(b, "Limit", fmt.Sprintf("%d", limit)).(UpdateBuilder)
+func (b updateBuilder) Limit(limit uint64) updateBuilder {
+	b.data.Limit = strconv.FormatUint(limit, 10)
+	return b
 }
 
 // Offset sets a OFFSET clause on the query.
-func (b UpdateBuilder) Offset(offset uint64) UpdateBuilder {
-	return builder.Set(b, "Offset", fmt.Sprintf("%d", offset)).(UpdateBuilder)
+func (b updateBuilder) Offset(offset uint64) updateBuilder {
+	b.data.Offset = strconv.FormatUint(offset, 10)
+	return b
 }
 
 // Suffix adds an expression to the end of the query
-func (b UpdateBuilder) Suffix(sql safeString, args ...interface{}) UpdateBuilder {
+func (b updateBuilder) Suffix(sql safeString, args ...interface{}) updateBuilder {
 	return b.SuffixExpr(Expr(sql, args...))
 }
 
 // SuffixExpr adds an expression to the end of the query
-func (b UpdateBuilder) SuffixExpr(expr Sqlizer) UpdateBuilder {
-	return builder.Append(b, "Suffixes", expr).(UpdateBuilder)
+func (b updateBuilder) SuffixExpr(expr Sqlizer) updateBuilder {
+	b.data.Suffixes = append(b.data.Suffixes, expr)
+	return b
 }
