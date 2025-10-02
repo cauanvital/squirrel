@@ -67,7 +67,7 @@ func (b statementBuilderType) Where(expr Sqlizer) statementBuilderType {
 }
 
 // StatementBuilder is a parent builder for other builders, e.g. SelectBuilder.
-var StatementBuilder = StatementBuilderType().PlaceholderFormat(Question)
+var StatementBuilder = StatementBuilderType()
 
 // Select returns a new SelectBuilder, optionally setting some result columns.
 //
