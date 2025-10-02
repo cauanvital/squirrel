@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 type valIf[T any] struct {
 	Value   T

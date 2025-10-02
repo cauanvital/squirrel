@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // RowScanner is the interface that wraps the Scan method.
 //
@@ -7,7 +7,7 @@ type RowScanner interface {
 	Scan(...interface{}) error
 }
 
-// Row wraps database/sql.Row to let squirrel return new errors on Scan.
+// Row wraps database/sql.Row to let squirrel2 return new errors on Scan.
 type Row struct {
 	RowScanner
 	err error

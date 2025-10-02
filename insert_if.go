@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // PlaceholderFormat sets PlaceholderFormat (e.g. Question or Dollar) for the
 // query.

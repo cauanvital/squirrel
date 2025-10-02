@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // StatementBuilderType is the type of StatementBuilder.
 type statementBuilderType struct {

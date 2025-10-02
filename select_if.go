@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // PlaceholderFormatIf sets PlaceholderFormat (e.g. Question or Dollar) for the
 // query if include is true.
@@ -72,8 +72,8 @@ func (b selectBuilder) ColumnsIf(columns ...valIf[safeString]) selectBuilder {
 // Unlike Columns, Column accepts args which will be bound to placeholders in
 // the columns string, for example:
 //
-//	ColumnIf(Expr("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3), true) == "IF(col IN (1, 2, 3), 1, 0) as col"
-//	ColumnIf(Expr("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3), false) == ""
+//	ColumnIf(Expr("IF(col IN ("+squirrel2.Placeholders(3)+"), 1, 0) as col", 1, 2, 3), true) == "IF(col IN (1, 2, 3), 1, 0) as col"
+//	ColumnIf(Expr("IF(col IN ("+squirrel2.Placeholders(3)+"), 1, 0) as col", 1, 2, 3), false) == ""
 func (b selectBuilder) ColumnIf(expr Sqlizer, include bool) selectBuilder {
 	if include {
 		return b.Column(expr)

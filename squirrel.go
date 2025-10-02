@@ -1,7 +1,7 @@
-// Package squirrel provides a fluent SQL generator.
+// Package squirrel2 provides a fluent SQL generator.
 //
-// See https://github.com/Masterminds/squirrel for examples.
-package squirrel
+// See https://github.com/Masterminds/squirrel2 for examples.
+package squirrel2
 
 import (
 	"bytes"
@@ -60,7 +60,7 @@ type Runner interface {
 }
 
 // WrapStdSql wraps a type implementing the standard SQL interface with methods that
-// squirrel expects.
+// squirrel2 expects.
 func WrapStdSql(stdSql StdSql) Runner {
 	return &stdsqlRunner{stdSql}
 }

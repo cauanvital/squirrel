@@ -14,15 +14,15 @@ services:
 sudo: false
 
 before_script:
-  - mysql -e 'CREATE DATABASE squirrel;'
-  - psql -c 'CREATE DATABASE squirrel;' -U postgres
+  - mysql -e 'CREATE DATABASE squirrel2;'
+  - psql -c 'CREATE DATABASE squirrel2;' -U postgres
 
 script:
   - go test
   - cd integration
   - go test -args -driver sqlite3
-  - go test -args -driver mysql -dataSource travis@/squirrel
-  - go test -args -driver postgres -dataSource 'postgres://postgres@localhost/squirrel?sslmode=disable'
+  - go test -args -driver mysql -dataSource travis@/squirrel2
+  - go test -args -driver postgres -dataSource 'postgres://postgres@localhost/squirrel2?sslmode=disable'
 
 notifications:
   irc: "irc.freenode.net#masterminds"

@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // WriteSql converts Sqlizer to SQL strings and writes it to buffer
 func (b *sqlizerBuffer) WriteSqlIf(item Sqlizer, include bool) {

@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 import (
 	"bytes"
@@ -299,7 +299,7 @@ func (b selectBuilder) RemoveColumns() selectBuilder {
 // Unlike Columns, Column accepts args which will be bound to placeholders in
 // the columns string, for example:
 //
-//	Column("IF(col IN ("+squirrel.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
+//	Column("IF(col IN ("+squirrel2.Placeholders(3)+"), 1, 0) as col", 1, 2, 3)
 func (b selectBuilder) Column(expr Sqlizer) selectBuilder {
 	b.data.Columns = append(b.data.Columns, expr)
 	return b

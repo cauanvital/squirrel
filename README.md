@@ -1,8 +1,8 @@
 ### My own Squirrel.
 I'm starting this fork to add some features I'm missing from Go query builders, like conditional clauses.
-I've also added the [safe-squirrel](https://github.com/bored-engineer/safe-squirrel) features here because I found then very cool.
+I've also added the [safe-squirrel2](https://github.com/bored-engineer/safe-squirrel2) features here because I found then very cool.
 
-[Original Squirrel READMED.md](https://github.com/Masterminds/squirrel/blob/master/README.md).
+[Original Squirrel READMED.md](https://github.com/Masterminds/squirrel2/blob/master/README.md).
 
 ## License
 

@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 // SelectIf returns a SelectBuilder for this StatementBuilderType, only with columns with true boolean value.
 func (b statementBuilderType) SelectIf(columns ...valIf[safeString]) selectBuilder {

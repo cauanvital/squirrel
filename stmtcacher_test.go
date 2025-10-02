@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 import (
 	"testing"

@@ -1,1 +1,1 @@
-package squirrel
+package squirrel2

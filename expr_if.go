@@ -1,4 +1,4 @@
-package squirrel
+package squirrel2
 
 type exprIf struct {
 	expression Sqlizer
